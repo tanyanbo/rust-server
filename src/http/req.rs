@@ -20,6 +20,13 @@ impl HttpVersion {
             _ => Err(HttpRequestError),
         }
     }
+
+    fn as_str(&self) -> &str {
+        match self {
+            HttpVersion::Http1 => "HTTP/1.1",
+            HttpVersion::Http11 => "HTTP/1",
+        }
+    }
 }
 
 #[derive(Debug)]
