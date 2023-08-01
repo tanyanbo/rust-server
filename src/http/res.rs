@@ -1,6 +1,7 @@
 use super::req::HttpVersion;
 
 // TODO: add remaining statuses
+#[allow(dead_code)]
 pub enum HttpResponseStatus {
     SwitchingProtocols,
     Ok,
@@ -77,13 +78,15 @@ impl HttpResponse {
     pub fn into_bytes(&self) -> Vec<u8> {
         let version: &str = HttpVersion::Http11.into();
         let status_line = format!(
-            "{version} {} {}",
+            "{} {} {}",
+            version,
             self.status.code(),
             self.status.reason_phrase()
         );
 
         let plain_text_response = format!(
-            "{status_line}\r\nContent-Length: {}\r\n\r\n{}",
+            "{}\r\nContent-Length: {}\r\n\r\n{}",
+            status_line,
             self.content.len(),
             self.content
         );
