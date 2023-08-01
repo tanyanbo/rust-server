@@ -5,7 +5,7 @@ mod connection;
 mod http;
 
 fn main() -> std::io::Result<()> {
-    let listener = TcpListener::bind("127.0.0.1:8080")?;
+    let listener = TcpListener::bind("0.0.0.0:8080")?;
 
     for stream in listener.incoming() {
         let stream = stream.unwrap();
