@@ -1,21 +1,31 @@
 use std::{fs, io::prelude::*, net::TcpStream};
 
-use crate::http::req::{HttpRequest, HttpRequestError};
+use crate::http::{
+    req::{HttpRequest, HttpRequestError},
+    res::{HttpResponse, HttpResponseStatus},
+};
 
 pub fn handle_connection(mut stream: TcpStream) -> Result<(), HttpRequestError> {
     let http_request = HttpRequest::new(&mut stream)?;
 
     println!("{:#?}", http_request);
 
-    let status_line = "HTTP/1.1 200 OK";
-    let contents = fs::read_to_string("src/templates/index.html")
-        .expect("response html template should be present");
-    let response = format!(
-        "{status_line}\r\nContent-Length: {}\r\n\r\n{contents}",
-        contents.len()
-    );
+    let response = match http_request.path.as_str() {
+        "/" => HttpResponse::new(
+            HttpResponseStatus::Ok,
+            fs::read_to_string("src/templates/index.html")
+                .expect("response html template should be present"),
+        ),
+        _ => HttpResponse::new(
+            HttpResponseStatus::NotFound,
+            fs::read_to_string("src/templates/404.html")
+                .expect("not found html template should be present"),
+        ),
+    };
 
-    stream.write_all(response.as_bytes()).unwrap();
+    let response = response.into_bytes();
+
+    stream.write_all(&response[..]).unwrap();
 
     Ok(())
 }

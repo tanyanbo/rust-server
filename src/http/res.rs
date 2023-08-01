@@ -1,5 +1,7 @@
+use super::req::HttpVersion;
+
 // TODO: add remaining statuses
-pub enum ResponseStatus {
+pub enum HttpResponseStatus {
     SwitchingProtocols,
     Ok,
     Created,
@@ -18,46 +20,72 @@ pub enum ResponseStatus {
     BadGateway,
 }
 
-impl ResponseStatus {
+impl HttpResponseStatus {
     pub fn code(&self) -> &str {
         match self {
-            ResponseStatus::SwitchingProtocols => "101",
-            ResponseStatus::Ok => "200",
-            ResponseStatus::Created => "201",
-            ResponseStatus::NoContent => "204",
-            ResponseStatus::MultipleChoices => "300",
-            ResponseStatus::MovedPermanently => "301",
-            ResponseStatus::NotModified => "304",
-            ResponseStatus::BadRequest => "400",
-            ResponseStatus::Unauthorized => "401",
-            ResponseStatus::Forbidden => "403",
-            ResponseStatus::NotFound => "404",
-            ResponseStatus::MethodNotAllowed => "405",
-            ResponseStatus::TooManyRequests => "429",
-            ResponseStatus::InternalServerError => "500",
-            ResponseStatus::NotImplemented => "501",
-            ResponseStatus::BadGateway => "502",
+            HttpResponseStatus::SwitchingProtocols => "101",
+            HttpResponseStatus::Ok => "200",
+            HttpResponseStatus::Created => "201",
+            HttpResponseStatus::NoContent => "204",
+            HttpResponseStatus::MultipleChoices => "300",
+            HttpResponseStatus::MovedPermanently => "301",
+            HttpResponseStatus::NotModified => "304",
+            HttpResponseStatus::BadRequest => "400",
+            HttpResponseStatus::Unauthorized => "401",
+            HttpResponseStatus::Forbidden => "403",
+            HttpResponseStatus::NotFound => "404",
+            HttpResponseStatus::MethodNotAllowed => "405",
+            HttpResponseStatus::TooManyRequests => "429",
+            HttpResponseStatus::InternalServerError => "500",
+            HttpResponseStatus::NotImplemented => "501",
+            HttpResponseStatus::BadGateway => "502",
         }
     }
 
     pub fn reason_phrase(&self) -> &str {
         match self {
-            ResponseStatus::SwitchingProtocols => "Switching Protocols",
-            ResponseStatus::Ok => "OK",
-            ResponseStatus::Created => "Created",
-            ResponseStatus::NoContent => "No Content",
-            ResponseStatus::MultipleChoices => "Multiple Choices",
-            ResponseStatus::MovedPermanently => "Moved Permanently",
-            ResponseStatus::NotModified => "Not Modified",
-            ResponseStatus::BadRequest => "Bad Request",
-            ResponseStatus::Unauthorized => "Unauthorized",
-            ResponseStatus::Forbidden => "Forbidden",
-            ResponseStatus::NotFound => "Not Found",
-            ResponseStatus::MethodNotAllowed => "Method Not Allowed",
-            ResponseStatus::TooManyRequests => "Too Many Requests",
-            ResponseStatus::InternalServerError => "Internal Server Error",
-            ResponseStatus::NotImplemented => "Not Implemented",
-            ResponseStatus::BadGateway => "Bad Gateway",
+            HttpResponseStatus::SwitchingProtocols => "Switching Protocols",
+            HttpResponseStatus::Ok => "OK",
+            HttpResponseStatus::Created => "Created",
+            HttpResponseStatus::NoContent => "No Content",
+            HttpResponseStatus::MultipleChoices => "Multiple Choices",
+            HttpResponseStatus::MovedPermanently => "Moved Permanently",
+            HttpResponseStatus::NotModified => "Not Modified",
+            HttpResponseStatus::BadRequest => "Bad Request",
+            HttpResponseStatus::Unauthorized => "Unauthorized",
+            HttpResponseStatus::Forbidden => "Forbidden",
+            HttpResponseStatus::NotFound => "Not Found",
+            HttpResponseStatus::MethodNotAllowed => "Method Not Allowed",
+            HttpResponseStatus::TooManyRequests => "Too Many Requests",
+            HttpResponseStatus::InternalServerError => "Internal Server Error",
+            HttpResponseStatus::NotImplemented => "Not Implemented",
+            HttpResponseStatus::BadGateway => "Bad Gateway",
         }
+    }
+}
+
+pub struct HttpResponse {
+    pub status: HttpResponseStatus,
+    pub content: String,
+}
+
+impl HttpResponse {
+    pub fn new(status: HttpResponseStatus, content: String) -> Self {
+        Self { status, content }
+    }
+
+    pub fn into_bytes(&self) -> Vec<u8> {
+        let version: &str = HttpVersion::Http11.into();
+        let status_line = format!(
+            "{version} {} {}",
+            self.status.code(),
+            self.status.reason_phrase()
+        );
+
+        format!(
+            "{status_line}\r\nContent-Length: {}\r\n\r\n{}",
+            self.content.len(),
+            self.content
+        ).into_bytes()
     }
 }

@@ -20,8 +20,10 @@ impl HttpVersion {
             _ => Err(HttpRequestError),
         }
     }
+}
 
-    fn as_str(&self) -> &str {
+impl Into<&str> for HttpVersion {
+    fn into(self) -> &'static str {
         match self {
             HttpVersion::Http1 => "HTTP/1.1",
             HttpVersion::Http11 => "HTTP/1",
@@ -59,9 +61,9 @@ impl HttpMethod {
 
 #[derive(Debug)]
 pub struct HttpRequest {
-    method: HttpMethod,
-    path: String,
-    version: HttpVersion,
+    pub method: HttpMethod,
+    pub path: String,
+    pub version: HttpVersion,
 }
 
 impl HttpRequest {
