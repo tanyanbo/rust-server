@@ -1,10 +1,6 @@
-use std::{
-    fs,
-    io::{prelude::*, BufReader},
-    net::TcpStream,
-};
+use std::{fs, io::prelude::*, net::TcpStream};
 
-use crate::req::{HttpRequest, HttpRequestError};
+use crate::http::req::{HttpRequest, HttpRequestError};
 
 pub fn handle_connection(mut stream: TcpStream) -> Result<(), HttpRequestError> {
     let http_request = HttpRequest::new(&mut stream)?;
