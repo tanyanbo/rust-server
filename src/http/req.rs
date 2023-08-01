@@ -25,8 +25,8 @@ impl HttpVersion {
 impl Into<&str> for HttpVersion {
     fn into(self) -> &'static str {
         match self {
-            HttpVersion::Http1 => "HTTP/1.1",
-            HttpVersion::Http11 => "HTTP/1",
+            HttpVersion::Http1 => "HTTP/1",
+            HttpVersion::Http11 => "HTTP/1.1",
         }
     }
 }

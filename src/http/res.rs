@@ -82,10 +82,11 @@ impl HttpResponse {
             self.status.reason_phrase()
         );
 
-        format!(
+        let plain_text_response = format!(
             "{status_line}\r\nContent-Length: {}\r\n\r\n{}",
             self.content.len(),
             self.content
-        ).into_bytes()
+        );
+        plain_text_response.into_bytes()
     }
 }

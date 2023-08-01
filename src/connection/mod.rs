@@ -8,7 +8,6 @@ use crate::http::{
 pub fn handle_connection(mut stream: TcpStream) -> Result<(), HttpRequestError> {
     let http_request = HttpRequest::new(&mut stream)?;
 
-    println!("{:#?}", http_request);
 
     let response = match http_request.path.as_str() {
         "/" => HttpResponse::new(
@@ -25,7 +24,7 @@ pub fn handle_connection(mut stream: TcpStream) -> Result<(), HttpRequestError> 
 
     let response = response.into_bytes();
 
-    stream.write_all(&response[..]).unwrap();
+    stream.write_all(&response).unwrap();
 
     Ok(())
 }
