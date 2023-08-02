@@ -10,7 +10,19 @@ type Job = Box<dyn FnOnce() + Send + 'static>;
 
 pub struct ThreadPool {
     workers: Vec<Worker>,
-    sender: Sender<Job>,
+    sender: Option<Sender<Job>>,
+}
+
+impl Drop for ThreadPool {
+    fn drop(&mut self) {
+        drop(self.sender.take());
+
+        for worker in &mut self.workers {
+            if let Some(handle) = worker.handle.take() {
+                handle.join().unwrap();
+            }
+        }
+    }
 }
 
 impl ThreadPool {
@@ -30,18 +42,18 @@ impl ThreadPool {
 
         Self {
             workers,
-            sender: tx,
+            sender: Some(tx),
         }
     }
 
     pub fn exec(&self, job: Job) {
-        let _ = self.sender.send(job);
+        let _ = self.sender.as_ref().unwrap().send(job);
     }
 }
 
 struct Worker {
     id: usize,
-    handle: JoinHandle<()>,
+    handle: Option<JoinHandle<()>>,
 }
 
 impl Worker {
@@ -58,6 +70,9 @@ impl Worker {
             }
         });
 
-        Self { id, handle }
+        Self {
+            id,
+            handle: Some(handle),
+        }
     }
 }
