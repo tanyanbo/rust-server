@@ -1,5 +1,5 @@
 use connection::handle_connection;
-use std::{net::TcpListener};
+use std::net::TcpListener;
 use thread_pool::ThreadPool;
 
 mod connection;

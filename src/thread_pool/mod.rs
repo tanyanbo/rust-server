@@ -1,6 +1,6 @@
 use std::{
     sync::{
-        mpsc::{channel, Sender},
+        mpsc::{channel, Receiver, Sender},
         Arc, Mutex,
     },
     thread::{self, JoinHandle},
@@ -23,17 +23,9 @@ impl ThreadPool {
 
         for id in 0..number {
             let receiver = Arc::clone(&receiver);
-            let handle = thread::spawn(move || loop {
-                let message = receiver.lock().unwrap().recv();
-                if let Ok(job) = message {
-                    println!("Worker {} is handling a connection", id);
-                    job();
-                } else {
-                    println!("Worker {} is disconnecting", id);
-                    break;
-                }
-            });
-            workers.push(Worker { id, handle });
+
+            let worker = Worker::new(id, receiver);
+            workers.push(worker);
         }
 
         Self {
@@ -50,4 +42,22 @@ impl ThreadPool {
 struct Worker {
     id: usize,
     handle: JoinHandle<()>,
+}
+
+impl Worker {
+    fn new(id: usize, receiver: Arc<Mutex<Receiver<Job>>>) -> Self {
+        let handle = thread::spawn(move || loop {
+            let message = receiver.lock().unwrap().recv();
+
+            if let Ok(job) = message {
+                println!("Worker {} is handling a connection", id);
+                job();
+            } else {
+                println!("Worker {} is disconnecting", id);
+                break;
+            }
+        });
+
+        Self { id, handle }
+    }
 }
